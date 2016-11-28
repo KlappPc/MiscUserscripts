@@ -92,6 +92,7 @@ var fullMap = {
 var addedClassIds = [
 ];
 function addItem(elem) {
+  console.debug('start addItem');
   var owner = elem.element.innerHTML;
   owner = owner.substring(owner.indexOf('/', owner.indexOf('"') + 28) + 1);
   owner = owner.substring(0, owner.indexOf('/'));
@@ -107,15 +108,27 @@ function addItem(elem) {
     return;
   }
   var tags = item.tags;
+  
   var tag = tags[0];
   var i = 1;
-  while (tag.category != 'item_class') {
+  while (tag.category != 'item_class' && i<tags.length) {
     tag = tags[i];
     i++;
   }
   if (tag.internal_name != 'item_class_2') {
     return;
   }
+
+  tag = tags[0];
+  i = 1;
+  while (tag.category != 'cardborder' && i<tags.length) {
+    tag = tags[i];
+    i++;
+  }
+  if (tag.internal_name != 'cardborder_0') {
+    return;
+  }
+  
   if (badgeListReady.length != 0) {
     if (badgeListReady.indexOf(realApp) != - 1) {
       if (addedClassIds.indexOf(classId) == - 1) {
@@ -159,6 +172,7 @@ function addItem(elem) {
       fullMap[ME][realApp][classId] = 0;
     }
   }
+  console.debug('emd addItem');
 }
 function getDifferent(inp) {
   return Object.keys(inp).length;
@@ -168,7 +182,7 @@ function getMinumum(inp) {
   var arr = Object.keys(inp).map(function (key) {
     return inp[key];
   });
-  for (i = 0; i < arr.length; i++) {
+  for (var i = 0; i < arr.length; i++) {
     if (min > arr[i]) {
       min = arr[i];
     }
@@ -180,14 +194,14 @@ function mygetSum(inp) {
   var arr = Object.keys(inp).map(function (key) {
     return inp[key];
   });
-  for (i = 0; i < arr.length; i++) {
+  for (var i = 0; i < arr.length; i++) {
     sum = sum + arr[i];
   }
   return sum;
 }
 function doSubstract(inp, val) {
   var arr = Object.keys(inp).slice(0);
-  for (i = 0; i < arr.length; i++) {
+  for (var i = 0; i < arr.length; i++) {
     inp[arr[i]] = inp[arr[i]] - val;
   }
   return inp;
@@ -195,7 +209,8 @@ function doSubstract(inp, val) {
 function removeFullSets() {
   var gameMap = fullMap[ME];
   var games = Object.keys(gameMap).slice(0);
-  for (i = 0; i < games.length; i++) {
+  
+  for (var i = 0; i < games.length; i++) {
     if (getDifferent(gameMap[games[i]]) == badgeList[games[i]]) {
       gameMap[games[i]] = doSubstract(gameMap[games[i]], getMinumum(gameMap[games[i]]));
     }
@@ -250,19 +265,27 @@ function calculateTradeOffer() {
     cards.sort(function (a, b) {
       return mysort(gameMapMe[games[i]][a], gameMapMe[games[i]][b]);
     });
+	// for some games it was not sorted here... like javascript, wtf...second call fixed it...
+	cards.sort(function (a, b) {
+      return mysort(gameMapMe[games[i]][a], gameMapMe[games[i]][b]);
+    });
     var taken = 0;
     for (var j = 0; j < cards.length; j++) {
       var have = gameMapMe[games[i]][cards[j]];
       if (have < 0 && taken<100) {
         //take as much as needed if possible
-        var max = gameMapOther[games[i]][cards[j]];
+        var max = 0;
+		if(games[i] in gameMapOther && cards[j] in gameMapOther[games[i]]){
+			max=gameMapOther[games[i]][cards[j]];
+		}else{
+		}
         var realTake = Math.min(Math.abs(have), max);
         arrTake[cards[j]]=realTake;
         taken=taken+realTake;
       }
       if (have > 0 && taken>0) {
         //now give as much as needed
-        var realGive = Math.max(have, taken);
+        var realGive = Math.min(have, taken);
         arrGive[cards[j]]=realGive;
         taken=taken-realGive;
       }
@@ -325,7 +348,7 @@ function main() {
     }
   }
   var inv = unsafeWindow.Draggables.drags;
-  for (i = 0; i < inv.length; i++) {
+  for (var i = 0; i < inv.length; i++) {
     addItem(inv[i]);
   }
   badgeListReady = [
@@ -346,7 +369,7 @@ console.debug("Items read");
   console.debug("rest removed");
   calculateTradeOffer();
   console.debug("Tradeoffer calculated");
-  for (i = 0; i < inv.length; i++) {
+  for (var i = 0; i < inv.length; i++) {
     doTradeOffer(inv[i]);
   }
   alert("Done");
