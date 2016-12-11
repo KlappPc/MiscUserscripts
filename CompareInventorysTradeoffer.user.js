@@ -101,7 +101,7 @@ function addItem(elem) {
   }
   var item = elem.element.rgItem;
   var appId = item.appid;
-  var realApp = item.app_data.appid;
+  var realApp = item.market_fee_app;
   var classId = item.classid;
   var contextId = item.contextid;
   if (appId != 753 || contextId != '6') {
@@ -301,7 +301,7 @@ function doTradeOffer(elem){
   }
   var item = elem.element.rgItem;
   var appId = item.appid;
-  var realApp = item.app_data.appid;
+  var realApp = item.market_fee_app;
   var classId = item.classid;
   var contextId = item.contextid;
   if (appId != 753 || contextId != '6') {
