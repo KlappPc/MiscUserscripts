@@ -73,9 +73,10 @@ echo "</body></html>";
 	There should be no personal data whatsoever inside that data and I neither store nor send it to anyone else. The text should only contain lists with appids. <br />
 	There should be 8 lists: owned apps/packages, ignored apps/packages, wishlist, packages/apps in cart and recommended tags. <br />
 	I do only use owned apps (rgOwnedApps) and wishlist (rgWishlist). Everything else can be removed. If you want to remove stuff or want to check whats inside please use an JSON editor like <a href="http://www.jsoneditoronline.org/">this</a>.<br /><br />
-	<form action="#" method="post"><textarea name="txt" style="width:700px;"></textarea><br />  <button>Send</button></form><br /> 
+	<form action="#" method="post"><textarea name="txt" style="width:700px;"></textarea><br />  <button>Send</button></form><br /> <br /> 
+	PS: I don't use a "normal" method like parsing your (public) profile or such, because I am lazy^^.
 	</div></div>
-	</body></html>';
+	</body></html>
 	<?
 }
 
