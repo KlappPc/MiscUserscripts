@@ -85,7 +85,7 @@ function parseBadgePage() {
   ];
   GM_setValue('g_badgeListReady', JSON.stringify(badgeListReady));
   GM_setValue('g_badgeList', JSON.stringify(badgeList));
-  alert("Done");
+  alert('Done');
 }
 var fullMap = {
 };
@@ -108,27 +108,24 @@ function addItem(elem) {
     return;
   }
   var tags = item.tags;
-  
   var tag = tags[0];
   var i = 1;
-  while (tag.category != 'item_class' && i<tags.length) {
+  while (tag.category != 'item_class' && i < tags.length) {
     tag = tags[i];
     i++;
   }
   if (tag.internal_name != 'item_class_2') {
     return;
   }
-
   tag = tags[0];
   i = 1;
-  while (tag.category != 'cardborder' && i<tags.length) {
+  while (tag.category != 'cardborder' && i < tags.length) {
     tag = tags[i];
     i++;
   }
   if (tag.internal_name != 'cardborder_0') {
     return;
   }
-  
   if (badgeListReady.length != 0) {
     if (badgeListReady.indexOf(realApp) != - 1) {
       if (addedClassIds.indexOf(classId) == - 1) {
@@ -141,15 +138,14 @@ function addItem(elem) {
       }
     }
   }
-    if (!(owner in fullMap)){
+  if (!(owner in fullMap)) {
     fullMap[owner] = {
     };
   }
-  if(!(realApp in badgeList) && badgeListReady.indexOf(realApp) == - 1){
-	  return;
+  if (!(realApp in badgeList) && badgeListReady.indexOf(realApp) == - 1) {
+    return;
   }
-
-  if (!(realApp in fullMap[owner])){
+  if (!(realApp in fullMap[owner])) {
     fullMap[owner][realApp] = {
     };
   }
@@ -159,20 +155,19 @@ function addItem(elem) {
     fullMap[owner][realApp][classId] = 1;
   }
   if (owner != ME) {
-  if (!(ME in fullMap)){
-      alert("possible wrong owner?" + owner);
-    fullMap[ME] = {
-    };
-  }
-    if (!(realApp in fullMap[ME])){
+    if (!(ME in fullMap)) {
+      alert('possible wrong owner?' + owner);
+      fullMap[ME] = {
+      };
+    }
+    if (!(realApp in fullMap[ME])) {
       fullMap[ME][realApp] = {
       };
     }
-    if (!(classId in fullMap[ME][realApp])){
+    if (!(classId in fullMap[ME][realApp])) {
       fullMap[ME][realApp][classId] = 0;
     }
   }
-  console.debug('emd addItem');
 }
 function getDifferent(inp) {
   return Object.keys(inp).length;
@@ -209,7 +204,6 @@ function doSubstract(inp, val) {
 function removeFullSets() {
   var gameMap = fullMap[ME];
   var games = Object.keys(gameMap).slice(0);
-  
   for (var i = 0; i < games.length; i++) {
     if (getDifferent(gameMap[games[i]]) == badgeList[games[i]]) {
       gameMap[games[i]] = doSubstract(gameMap[games[i]], getMinumum(gameMap[games[i]]));
@@ -232,21 +226,9 @@ function removeRestAndShiftSets() {
     }
   }
 }
-function mysort(a, b) {
-  if (a > 0 && b < 0) {
-    return 1;
-  }
-  if (a < 0 && b > 0) {
-    return 1;
-  }
-  if (a > 0 && b > 0) {
-    return b - a;
-  }
-  return a - b;
-}
 var arrTake = {
 };
-var arrGive={
+var arrGive = {
 };
 function calculateTradeOffer() {
   var ownerME = ME,
@@ -262,37 +244,33 @@ function calculateTradeOffer() {
   var games = Object.keys(gameMapMe).slice(0);
   for (var i = 0; i < games.length; i++) {
     var cards = Object.keys(gameMapMe[games[i]]).slice(0);
-    cards.sort(function (a, b) {
-      return mysort(gameMapMe[games[i]][a], gameMapMe[games[i]][b]);
-    });
-	// for some games it was not sorted here... like javascript, wtf...second call fixed it...
-	cards.sort(function (a, b) {
-      return mysort(gameMapMe[games[i]][a], gameMapMe[games[i]][b]);
-    });
     var taken = 0;
     for (var j = 0; j < cards.length; j++) {
       var have = gameMapMe[games[i]][cards[j]];
-      if (have < 0 && taken<100) {
+      if (have < 0 && taken < 100) {
         //take as much as needed if possible
         var max = 0;
-		if(games[i] in gameMapOther && cards[j] in gameMapOther[games[i]]){
-			max=gameMapOther[games[i]][cards[j]];
-		}else{
-		}
+        if (games[i] in gameMapOther && cards[j] in gameMapOther[games[i]]) {
+          max = gameMapOther[games[i]][cards[j]];
+        } else {
+        }
         var realTake = Math.min(Math.abs(have), max);
-        arrTake[cards[j]]=realTake;
-        taken=taken+realTake;
+        arrTake[cards[j]] = realTake;
+        taken = taken + realTake;
       }
-      if (have > 0 && taken>0) {
+    }
+    for (var j = 0; j < cards.length; j++) {
+      var have = gameMapMe[games[i]][cards[j]];
+      if (have > 0 && taken > 0) {
         //now give as much as needed
         var realGive = Math.min(have, taken);
-        arrGive[cards[j]]=realGive;
-        taken=taken-realGive;
+        arrGive[cards[j]] = realGive;
+        taken = taken - realGive;
       }
     }
   }
 }
-function doTradeOffer(elem){
+function doTradeOffer(elem, str) {
   var owner = elem.element.innerHTML;
   owner = owner.substring(owner.indexOf('/', owner.indexOf('"') + 28) + 1);
   owner = owner.substring(0, owner.indexOf('/'));
@@ -300,6 +278,9 @@ function doTradeOffer(elem){
     return;
   }
   var item = elem.element.rgItem;
+  if (!item.type.toUpperCase().startsWith(str)) {
+    return;
+  }
   var appId = item.appid;
   var realApp = item.market_fee_app;
   var classId = item.classid;
@@ -317,24 +298,19 @@ function doTradeOffer(elem){
   if (tag.internal_name != 'item_class_2') {
     return;
   }
-  if(owner==ME){
-    if((classId in arrGive) && arrGive[classId]>0){
+  if (owner === ME) {
+    if ((classId in arrGive) && arrGive[classId] > 0) {
       unsafeWindow.MoveItemToTrade(elem.element);
-      arrGive[classId]=arrGive[classId]-1;
+      arrGive[classId] = arrGive[classId] - 1;
     }
-    
-  }else{
-    if((classId in arrTake) && arrTake[classId]>0){
+  } else {
+    if ((classId in arrTake) && arrTake[classId] > 0) {
       unsafeWindow.MoveItemToTrade(elem.element);
-      arrTake[classId]=arrTake[classId]-1;
+      arrTake[classId] = arrTake[classId] - 1;
     }
   }
-  
-  
-  
 }
 function main() {
-
   fullMap = {
   };
   if (typeof GM_getValue('g_badgeList') === 'undefined') {
@@ -360,19 +336,22 @@ function main() {
   if (!(ME in fullMap)) {
     alert('You need to be part of that tradeoffer. Given names are: ' + Object.keys(fullMap));
     return;
-  }  // works until here. Just wanted to note that javascript sucks.
-console.debug("Items read");
+  } // works until here. Just wanted to note that javascript sucks.
 
+  console.debug('end addItem');
   removeFullSets();
-  console.debug("fullsets removed");
+  console.debug('fullsets removed');
   removeRestAndShiftSets();
-  console.debug("rest removed");
+  console.debug('rest removed');
   calculateTradeOffer();
-  console.debug("Tradeoffer calculated");
-  for (var i = 0; i < inv.length; i++) {
-    doTradeOffer(inv[i]);
+  console.debug('Tradeoffer calculated');
+  var alpha = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (var j = 0; j < 36; j++) {
+    for (var i = 0; i < inv.length; i++) {
+      doTradeOffer(inv[i], alpha.charAt(j));
+    }
   }
-  alert("Done");
+  alert('Done');
   //  MoveItemToTrade(elem);
   //console.debug(fullMap); //.forEach(function (owner){owner.forEach(console.debug)});
 }

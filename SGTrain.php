@@ -18,7 +18,7 @@ if(!isset($arr['rgOwnedApps'])){
 $wishlist=$arr['rgWishlist'];
 $owned=$arr['rgOwnedApps'];
 
-$apps = array(1,2,3); // update with appIds
+$apps = array(232890,346940,345180,359310,400110,223470,360960,34900,498450,418070,347560,412600,454200,363490,277700,423610,546380); // update with appIds
 
 $wlcount=0;
 $notownedcount=0;
