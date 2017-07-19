@@ -40,11 +40,11 @@ function doTradeOffer(elem) {
   var markethash = item.market_hash_name;
   var index = toSend.indexOf(markethash);
   if (index > - 1) {
-    console.debug('moveitem '+ markethash);
+    console.debug('moveitem ' + markethash);
     unsafeWindow.MoveItemToTrade(elem.element);
     toSend.splice(index, 1);
-  }else{
-    console.debug('ignoreitem '+ markethash);
+  } else {
+    console.debug('ignoreitem ' + markethash);
   }
 }
 function main() {
@@ -55,18 +55,28 @@ function main() {
     toSend = [
     ];
     //var type = prompt('Please enter the type (0=value+above, 1= value, 2= value and below', '1');
-    var minvalue = prompt('Please enter the value in cent', '10');
+    var minvalue = prompt('Please enter the value in cent', '7');
     var fullstring = GM_getValue('g_inventoryPrices');
-
     var arr = fullstring.split('\n');
     for (var i = 0; i < arr.length; i++) {
       var arr2 = arr[i].split(';');
-      if (parseInt(arr2[3])>=parseInt(minvalue)) {
-        for (var j = 0; j < parseInt(arr2[2]); j++) {
-          toSend.push(arr2[0] + '-' + arr2[1]);
+      if (parseInt(minvalue) > 0) {
+        if (parseInt(arr2[3]) >= parseInt(minvalue)) {
+          for (var j = 0; j < parseInt(arr2[2]); j++) {
+            toSend.push(arr2[0] + '-' + arr2[1]);
+          }
+        } else {
+          console.debug('ignored' + arr2[0] + '-' + arr2[1] + ' (' + parseInt(arr2[3]) + ')');
         }
-      }else{
-        console.debug('ignored'+ arr2[0] + '-' + arr2[1]+' ('+parseInt(arr2[3])+')');
+      }
+      if (parseInt(minvalue) <= 0) {
+        if (parseInt(arr2[3]) <= - parseInt(minvalue)) {
+          for (var j = 0; j < parseInt(arr2[2]); j++) {
+            toSend.push(arr2[0] + '-' + arr2[1]);
+          }
+        } else {
+          console.debug('ignored' + arr2[0] + '-' + arr2[1] + ' (' + parseInt(arr2[3]) + ')');
+        }
       }
     }
     var inv = unsafeWindow.Draggables.drags;
