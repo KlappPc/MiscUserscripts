@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -21,6 +23,8 @@ public class Idlers {
 	static String SEARCH = "var rgGames = ";
 	static List<Idler> idlers=new ArrayList<Idler>();
 	static List<Game> games=new ArrayList<Game>(); 
+	static List<String> removedGames=new ArrayList<String>(); 
+	static List<String> cardGames=new ArrayList<String>(); 
 	
 	/**
 	 * Returns the complete content of the requested Website as a String.
@@ -57,12 +61,7 @@ public class Idlers {
 	}
 	
 	public static JSONArray findGames(String id) throws IOException {
-		//String complete = getBodyOf("http://steamcommunity.com/" + id
-		//		+ "/games/?tab=all");
 		String complete = getBodyOf("http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=F9DF9B7821B26BA2BDDA220BF119D1BB&steamid="+id+"&format=json");
-		//int where = complete.indexOf(SEARCH);
-		//String arr = complete.substring(complete.indexOf("[", where),
-		//		complete.indexOf("}];", where) + 2);
 		JSONObject obj=new JSONObject(complete).getJSONObject("response");
 		return obj.getJSONArray("games");
 	}
@@ -70,8 +69,23 @@ public class Idlers {
 	public static void main(String[] args) {
 		String listIdlers="idlers.txt";
 		String listGames="games.csv";
+		String listRemovedGames="removed.txt";
 		String result="result.html";
 		String result2="result2.html";
+		String jsonCards="STM.json";
+		
+		String content;
+		try {
+			content = new String(Files.readAllBytes(Paths.get(jsonCards)));
+			JSONArray cards= new JSONObject(content).getJSONArray("sets");
+			for (int i = 0; i < cards.length(); i++) {
+				cardGames.add(cards.getJSONObject(i).getString("appid"));
+			}
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		
 		BufferedReader in;
 		File file;
@@ -103,11 +117,25 @@ public class Idlers {
 			e.printStackTrace();
 		}
 		
+		try {
+		file = new File(listRemovedGames);
+		if (file.exists()) {
+			in = new BufferedReader(new FileReader(file));
+			while ((line = in.readLine()) != null) {
+				removedGames.add(line.trim());
+			}
+			in.close();
+		}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		//compare
 		StringBuilder bu=new StringBuilder();
 		StringBuilder butmp=new StringBuilder();
 		for (Iterator iterator = games.iterator(); iterator.hasNext();) {
 			Game game = (Game) iterator.next();
+			if(!removedGames.contains(game.id.trim())){
 			int missing=0;
 			for (Iterator iterator2 = idlers.iterator(); iterator2.hasNext();) {
 				Idler idler = (Idler) iterator2.next();
@@ -115,12 +143,18 @@ public class Idlers {
 				missing++;
 				butmp.append("<a href=http://steamcommunity.com/profiles/"+idler.id+">"+idler.name+"</a>,");
 			}
+			if(!cardGames.contains(game.id)){
+				bu.append("-");
+			}
 			if (missing>0){
 				butmp.setLength(butmp.length()-1);
-				bu.append(missing).append("; <a href=http://store.steampowered.com/app/").append(game.id).append(">").append(game.name).append(" (").append(game.type).append(")</a>: ").append(butmp.toString()).append("<br />");
+				bu.append(missing).append("; <a href=http://store.steampowered.com/app/").append(game.id).append(">").append(game.name).append("</a>;").append(game.type).append("; ").append(butmp.toString()).append("<br />");
 				butmp.setLength(0);
 			}else{
-				bu.append(missing).append("; <a href=http://store.steampowered.com/app/").append(game.id).append(">").append(game.name).append(" (").append(game.type).append(")</a>").append("<br />");
+				bu.append(missing).append("; <a href=http://store.steampowered.com/app/").append(game.id).append(">").append(game.name).append("</a>;").append(game.type).append(";").append("XX <br />");
+			}
+			}else{
+				bu.append("XX").append("; <a href=http://store.steampowered.com/app/").append(game.id).append(">").append(game.name).append("</a>;").append(game.type).append(";").append("XX <br />");
 			}
 			
 		}
@@ -140,6 +174,7 @@ public class Idlers {
 			int missing=0;
 			for (Iterator iterator = games.iterator(); iterator.hasNext();) {
 				Game game = (Game) iterator.next();
+				if(removedGames.contains(game.id.trim())) continue;
 				if(idler.games.contains(Integer.valueOf(game.id)) || !game.type.startsWith("BUNDLE") || game.type.startsWith("WHOLESALE")|| game.type.startsWith("DEMAND")|| game.type.startsWith("MYDEALZ")) continue;
 				missing++;
 				butmp.append(game.name);
