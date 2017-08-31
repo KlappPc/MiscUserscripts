@@ -210,6 +210,48 @@ function removeFullSets() {
     }
   }
 }
+var arrTake = {
+};
+var arrGive = {
+};
+function directOnlyFullSet() {
+  var gameMap = fullMap[ME];
+  var games = Object.keys(gameMap).slice(0);
+  for (var i = 0; i < games.length; i++) {
+    if (getDifferent(gameMap[games[i]]) == badgeList[games[i]]) {
+      var Ids = Object.keys(gameMap[games[i]]).slice(0);
+      for (var k = 0; k < Ids.length; k++) {
+        arrGive[Ids[k]] = getMinumum(gameMap[games[i]]);
+      }
+    }
+  }
+}
+function directOnlyRest() {
+  removeFullSets();
+  var gameMap = fullMap[ME];
+  var games = Object.keys(gameMap).slice(0);
+  for (var i = 0; i < games.length; i++) {
+    if (mygetSum(gameMap[games[i]]) < badgeList[games[i]]) {
+      var Ids = Object.keys(gameMap[games[i]]).slice(0);
+      for (var k = 0; k < Ids.length; k++) {
+        arrGive[Ids[k]] = gameMap[games[i]][Ids[k]];
+      }
+    }
+  }
+}
+function directOnlySet() {
+  removeFullSets();
+  var gameMap = fullMap[ME];
+  var games = Object.keys(gameMap).slice(0);
+  for (var i = 0; i < games.length; i++) {
+    if (mygetSum(gameMap[games[i]]) >= badgeList[games[i]]) {
+      var Ids = Object.keys(gameMap[games[i]]).slice(0);
+      for (var k = 0; k < Ids.length; k++) {
+        arrGive[Ids[k]] = gameMap[games[i]][Ids[k]];
+      }
+    }
+  }
+}
 function removeRestAndShiftSets() {
   var gameMap = fullMap[ME];
   var games = Object.keys(gameMap).slice(0);
@@ -226,13 +268,9 @@ function removeRestAndShiftSets() {
     }
   }
 }
-var arrTake = {
-};
-var arrGive = {
-};
 function calculateTradeOffer() {
-  var ownerME = ME,
-  ownerOther;
+  var ownerME = ME;
+  var ownerOther;
   var names = Object.keys(fullMap);
   if (names[0] === ownerME) {
     ownerOther = names[1];
@@ -271,6 +309,13 @@ function calculateTradeOffer() {
   }
 }
 function doTradeOffer(elem, str) {
+  var item = elem.element.rgItem;
+  if (!item.type.toUpperCase().startsWith(str)) {
+    return;
+  }
+  doTradeOffer(elem)
+}
+function doTradeOffer(elem) {
   var owner = elem.element.innerHTML;
   owner = owner.substring(owner.indexOf('/', owner.indexOf('"') + 28) + 1);
   owner = owner.substring(0, owner.indexOf('/'));
@@ -278,9 +323,6 @@ function doTradeOffer(elem, str) {
     return;
   }
   var item = elem.element.rgItem;
-  if (!item.type.toUpperCase().startsWith(str)) {
-    return;
-  }
   var appId = item.appid;
   var realApp = item.market_fee_app;
   var classId = item.classid;
@@ -355,6 +397,99 @@ function main() {
   //  MoveItemToTrade(elem);
   //console.debug(fullMap); //.forEach(function (owner){owner.forEach(console.debug)});
 }
+function main2() {
+  fullMap = {
+  };
+  if (typeof GM_getValue('g_badgeList') === 'undefined') {
+    console.debug('not doing shit');
+  } else {
+    if (Object.keys(badgeList).length == 0) {
+      badgeList = JSON.parse(GM_getValue('g_badgeList'));
+    }
+    if (badgeListReady.length == 0) {
+      badgeListReady = JSON.parse(GM_getValue('g_badgeListReady'));
+    }
+  }
+  var inv = unsafeWindow.Draggables.drags;
+  for (var i = 0; i < inv.length; i++) {
+    addItem(inv[i]);
+  }
+  badgeListReady = [
+  ];
+  if (!(ME in fullMap)) {
+    alert('You need to be part of that tradeoffer. Given names are: ' + Object.keys(fullMap));
+    return;
+  } // works until here. Just wanted to note that javascript sucks.
+
+  directOnlyFullSet();
+  console.debug('Tradeoffer calculated');
+  for (var i = 0; i < inv.length; i++) {
+    doTradeOffer(inv[i]);
+  }
+  alert('Done');
+}
+function main4() {
+  fullMap = {
+  };
+  if (typeof GM_getValue('g_badgeList') === 'undefined') {
+    console.debug('not doing shit');
+  } else {
+    if (Object.keys(badgeList).length == 0) {
+      badgeList = JSON.parse(GM_getValue('g_badgeList'));
+    }
+    if (badgeListReady.length == 0) {
+      badgeListReady = JSON.parse(GM_getValue('g_badgeListReady'));
+    }
+  }
+  var inv = unsafeWindow.Draggables.drags;
+  for (var i = 0; i < inv.length; i++) {
+    addItem(inv[i]);
+  }
+  badgeListReady = [
+  ];
+  if (!(ME in fullMap)) {
+    alert('You need to be part of that tradeoffer. Given names are: ' + Object.keys(fullMap));
+    return;
+  } // works until here. Just wanted to note that javascript sucks.
+
+  directOnlyRest();
+  console.debug('Tradeoffer calculated');
+  for (var i = 0; i < inv.length; i++) {
+    doTradeOffer(inv[i]);
+  }
+  alert('Done');
+}
+function main5() {
+  fullMap = {
+  };
+  if (typeof GM_getValue('g_badgeList') === 'undefined') {
+    console.debug('not doing shit');
+  } else {
+    if (Object.keys(badgeList).length == 0) {
+      badgeList = JSON.parse(GM_getValue('g_badgeList'));
+    }
+    if (badgeListReady.length == 0) {
+      badgeListReady = JSON.parse(GM_getValue('g_badgeListReady'));
+    }
+  }
+  var inv = unsafeWindow.Draggables.drags;
+  for (var i = 0; i < inv.length; i++) {
+    addItem(inv[i]);
+  }
+  badgeListReady = [
+  ];
+  if (!(ME in fullMap)) {
+    alert('You need to be part of that tradeoffer. Given names are: ' + Object.keys(fullMap));
+    return;
+  } // works until here. Just wanted to note that javascript sucks.
+
+  directOnlySet();
+  console.debug('Tradeoffer calculated');
+  for (var i = 0; i < inv.length; i++) {
+    doTradeOffer(inv[i]);
+  }
+  alert('Done');
+}
 var btn = document.createElement('BUTTON'); // Create a <button> element
 var t = document.createTextNode('Compare'); // Create a text node
 btn.appendChild(t);
@@ -367,3 +502,21 @@ btn2.appendChild(t2);
 btn2.onclick = parseBadgePage;
 parent2 = document.getElementById('mainContent'); // Append the text to <button>
 parent2.insertBefore(btn2, document.getElementById('trade_escrow_header')); // Append <button> to <body>
+var btn3 = document.createElement('BUTTON'); // Create a <button> element
+var t3 = document.createTextNode('SendFull'); // Create a text node
+btn3.appendChild(t3);
+btn3.onclick = main2;
+parent3 = document.getElementById('mainContent'); // Append the text to <button>
+parent3.insertBefore(btn3, document.getElementById('trade_escrow_header')); // Append <button> to <body>
+var btn4 = document.createElement('BUTTON'); // Create a <button> element
+var t4 = document.createTextNode('SendRest'); // Create a text node
+btn4.appendChild(t4);
+btn4.onclick = main4;
+parent4 = document.getElementById('mainContent'); // Append the text to <button>
+parent4.insertBefore(btn4, document.getElementById('trade_escrow_header')); // Append <button> to <body>
+var btn5 = document.createElement('BUTTON'); // Create a <button> element
+var t5 = document.createTextNode('SendSet'); // Create a text node
+btn5.appendChild(t5);
+btn5.onclick = main5;
+parent5 = document.getElementById('mainContent'); // Append the text to <button>
+parent5.insertBefore(btn5, document.getElementById('trade_escrow_header')); // Append <button> to <body>
